@@ -8,7 +8,7 @@ from kivy.uix.label import Label
 PAPYRUS_FONT = "Papyrus.ttf"
 
 
-class RandomLineApp(App):
+class RandomScriptureApp(App):
     def build(self):
         layout = BoxLayout(orientation="vertical", padding=20, spacing=20)
 
@@ -54,4 +54,4 @@ class RandomLineApp(App):
             self.result.text = "No lines available in asv.txt"
 
 if __name__ == "__main__":
-    RandomLineApp().run()
+    RandomScriptureApp().run()
