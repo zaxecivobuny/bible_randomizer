@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>ActuallyRandomBibleQuotes</title>
+<meta name="description" content="Random scripture from the American Standard Version.">
+<meta name="theme-color" content="#0a0a0a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="BibleQuotes">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<!-- Papyrus is a system font on iOS/macOS/Windows. Fantasy fallback for Android. -->
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #0a0a0a;
+    --surface: #141414;
+    --text: #e8e4df;
+    --accent: #d4a04a;
+    --accent-glow: rgba(212, 160, 74, 0.15);
+    --muted: #6b6560;
+    --radius: 20px;
+  }
+
+  html, body {
+    height: 100%;
+    font-family: Papyrus, 'Papyrus Condensed', fantasy, serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow: hidden;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+
+  body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    position: relative;
+  }
+
+  /* Atmospheric grain overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 100;
+  }
+
+  /* Subtle radial glow behind the card */
+  .glow {
+    position: fixed;
+    width: 500px;
+    height: 500px;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -55%);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+  }
+  .glow.visible { opacity: 1; }
+
+  /* Top label */
+  .label {
+    font-size: 1.4rem;
+    font-weight: 500;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    margin-bottom: 2.5rem;
+    opacity: 0;
+    animation: fadeDown 0.6s 0.2s ease forwards;
+  }
+
+  /* The card */
+  .card {
+    background: var(--surface);
+    border: 1px solid rgba(255,255,255,0.04);
+    border-radius: var(--radius);
+    padding: 3rem 2.5rem;
+    max-width: 520px;
+    width: 100%;
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    position: relative;
+    opacity: 0;
+    animation: fadeUp 0.7s 0.4s ease forwards;
+    transition: transform 0.4s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.4s ease;
+  }
+
+  .card::before {
+    content: '\2020';
+    position: absolute;
+    top: 0.6rem;
+    left: 1.4rem;
+    font-family: Papyrus, fantasy, serif;
+    font-size: 5rem;
+    color: var(--accent);
+    opacity: 0.15;
+    line-height: 1;
+  }
+
+  .card-text {
+    font-family: Papyrus, fantasy, serif;
+    font-size: clamp(1.2rem, 4vw, 1.7rem);
+    line-height: 1.55;
+    color: var(--text);
+    transition: opacity 0.3s ease;
+  }
+  .card-text.fading { opacity: 0; transform: translateY(6px); }
+
+  /* Line counter */
+  .counter {
+    margin-top: 1.5rem;
+    font-size: 0.75rem;
+    font-weight: 300;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+    opacity: 0;
+    animation: fadeUp 0.6s 0.6s ease forwards;
+  }
+
+  /* Button */
+  .btn {
+    margin-top: 2.5rem;
+    padding: 0.9rem 2.4rem;
+    font-family: Papyrus, fantasy, serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--bg);
+    background: var(--accent);
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    opacity: 0;
+    animation: fadeUp 0.6s 0.8s ease forwards;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(212, 160, 74, 0.3);
+  }
+  .btn:active {
+    transform: translateY(0) scale(0.97);
+  }
+
+  /* Ripple effect */
+  .btn .ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.35);
+    transform: scale(0);
+    animation: ripple 0.5s ease-out forwards;
+    pointer-events: none;
+  }
+
+  /* Instructions footer */
+  .footer {
+    position: fixed;
+    bottom: 1.5rem;
+    font-size: 0.65rem;
+    font-weight: 300;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+    opacity: 0;
+    animation: fadeUp 0.5s 1.2s ease forwards;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes ripple {
+    to { transform: scale(4); opacity: 0; }
+  }
+
+  /* Swipe hint on mobile */
+  @media (max-width: 600px) {
+    .card { padding: 2.5rem 1.8rem; }
+  }
+
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg: #f5f0ea;
+      --surface: #ffffff;
+      --text: #1a1815;
+      --accent: #b8872e;
+      --accent-glow: rgba(184, 135, 46, 0.08);
+      --muted: #9e958a;
+    }
+    .card { border-color: rgba(0,0,0,0.06); box-shadow: 0 2px 20px rgba(0,0,0,0.04); }
+  }
+</style>
+</head>
+<body>
+
+<div class="glow" id="glow"></div>
+
+<p class="label">The Word of the LORD</p>
+
+<div class="card" id="card">
+  <p class="card-text" id="line">Loading…</p>
+</div>
+
+<p class="counter" id="counter"></p>
+
+<button class="btn" id="btn" onclick="newLine(event)">Another</button>
+
+<p class="footer">Add to Home Screen to install as an app</p>
+
+<script>
+let LINES = [];
+let lastIndex = -1;
+
+function getRandomLine() {
+  if (LINES.length <= 1) return 0;
+  let idx;
+  do { idx = Math.floor(Math.random() * LINES.length); } while (idx === lastIndex);
+  lastIndex = idx;
+  return idx;
+}
+
+function newLine(e) {
+  if (LINES.length === 0) return;
+
+  // Ripple effect on button
+  if (e) {
+    const btn = document.getElementById('btn');
+    const ripple = document.createElement('span');
+    ripple.className = 'ripple';
+    const rect = btn.getBoundingClientRect();
+    const x = (e.clientX || rect.left + rect.width / 2) - rect.left;
+    const y = (e.clientY || rect.top + rect.height / 2) - rect.top;
+    ripple.style.left = x + 'px';
+    ripple.style.top = y + 'px';
+    btn.appendChild(ripple);
+    setTimeout(() => ripple.remove(), 600);
+  }
+
+  const el = document.getElementById('line');
+  el.classList.add('fading');
+
+  setTimeout(() => {
+    const idx = getRandomLine();
+    el.textContent = LINES[idx];
+    document.getElementById('counter').textContent = `Verse ${idx + 1} of ${LINES.length.toLocaleString()}`;
+    el.classList.remove('fading');
+  }, 280);
+}
+
+// Load the ASV Bible text file
+fetch('asv.txt')
+  .then(r => r.text())
+  .then(text => {
+    LINES = text.split('\n').map(l => l.trim()).filter(Boolean);
+    document.getElementById('line').textContent = `${LINES.length.toLocaleString()} verses loaded`;
+    setTimeout(() => newLine(null), 600);
+  })
+  .catch(() => {
+    document.getElementById('line').textContent = 'Could not load asv.txt — place the file next to index.html';
+  });
+
+// Show glow after load
+window.addEventListener('load', () => {
+  document.getElementById('glow').classList.add('visible');
+});
+
+// Service Worker registration for offline PWA
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>
