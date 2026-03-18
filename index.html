@@ -201,6 +201,12 @@
     .card { padding: 2.5rem 1.8rem; }
   }
 
+  /* Hide footer after home screen install */
+  @media (display-mode: standalone) {
+    .footer { display: none; }
+  }
+
+
   @media (prefers-color-scheme: light) {
     :root {
       --bg: #f5f0ea;
